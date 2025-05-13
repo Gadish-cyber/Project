@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today's Deals - Omnia Store</title>
+    <link rel="icon" type="image/png" href="img/logo.png">
+    <style>
+        :root {
+            --primary: #ff9900;
+            --secondary: #146eb4;
+            --light-bg: #f7f7f7;
+            --dark-bg: #131921;
+            --dark-secondary: #232f3e;
+            --text-light: #ffffff;
+            --text-dark: #111;
+            --card-bg-light: #ffffff;
+            --card-bg-dark: #1e1e1e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Amazon Ember', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--light-bg);
+            color: var(--text-dark);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark {
+            background: #121212;
+            color: #e0e0e0;
+            --light-bg: #121212;
+            --text-dark: #e0e0e0;
+            --card-bg-light: #1e1e1e;
+        }
+
+        header {
+            background: var(--dark-bg);
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left, .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .logo img {
+            height: 32px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.5rem;
+            border-radius: 3px;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #search {
+            flex-grow: 1;
+            max-width: 600px;
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .search-button {
+            background: var(--primary);
+            color: var(--text-dark);
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+        }
+
+        #user-menu {
+            position: relative;
+        }
+
+        #user-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: var(--card-bg-light);
+            color: var(--text-dark);
+            min-width: 200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            padding: 0.5rem;
+            z-index: 10;
+        }
+
+        #user-menu:hover #user-dropdown {
+            display: block;
+        }
+
+        #user-dropdown a {
+            display: block;
+            padding: 0.5rem;
+            color: var(--text-dark);
+            text-decoration: none;
+        }
+
+        #user-dropdown a:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        #cart {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            position: relative;
+        }
+
+        #cart-count {
+            color: var(--primary);
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+
+        #cart-count.animated {
+            transform: scale(1.2);
+        }
+
+        #cart-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: var(--card-bg-light);
+            color: var(--text-dark);
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            padding: 1rem;
+            z-index: 10;
+        }
+
+        #cart:hover #cart-dropdown {
+            display: block;
+        }
+
+        .cart-item, .saved-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item img, .saved-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+        }
+
+        .cart-item-info, .saved-item-info {
+            flex-grow: 1;
+        }
+
+        .cart-item-price, .saved-item-price {
+            font-weight: bold;
+        }
+
+        .cart-item-controls, .saved-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .cart-item-controls button, .saved-item-controls button {
+            background: var(--light-bg);
+            border: 1px solid #ddd;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .cart-item-controls button:hover, .saved-item-controls button:hover {
+            background: #e0e0e0;
+        }
+
+        .cart-item-quantity, .saved-item-quantity {
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .remove-item, .save-for-later, .move-to-cart {
+            color: #d32f2f;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        .save-for-later, .move-to-cart {
+            color: var(--secondary);
+        }
+
+        .remove-item:hover, .save-for-later:hover, .move-to-cart:hover {
+            text-decoration: underline;
+        }
+
+        .cart-summary {
+            padding: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .cart-summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .saved-items-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .saved-items-section h4 {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .checkout-button {
+            background: var(--primary);
+            color: var(--text-dark);
+            border: none;
+            padding: 0.5rem 1rem;
+            width: 100%;
+            margin-top: 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        #category-nav {
+            background: var(--dark-secondary);
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+        }
+
+        #category-nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            white-space: nowrap;
+            padding: 0.5rem;
+        }
+
+        #category-nav a:hover {
+            text-decoration: underline;
+        }
+
+        #category-nav a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .deals-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .deals-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .deals-title {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .time-left {
+            font-weight: bold;
+            color: #d32f2f;
+            transition: color 0.3s ease;
+        }
+
+        .time-left.urgent {
+            color: #b71c1c;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .deal-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .deal-card {
+            background: var(--card-bg-light);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .deal-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .deal-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .deal-info {
+            padding: 1.5rem;
+        }
+
+        .deal-price {
+            font-size: 1.5rem;
+            color: #d32f2f;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .deal-original-price {
+            text-decoration: line-through;
+            color: #666;
+            margin-left: 0.5rem;
+        }
+
+        .deal-discount {
+            background: #d32f2f;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .deal-title {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .deal-claimed {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .deal-button {
+            background: var(--primary);
+            color: var(--text-dark);
+            border: none;
+            padding: 0.75rem;
+            width: 100%;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .deal-button:hover {
+            background: #e68a00;
+        }
+
+        #dark-mode-toggle {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--card-bg-light);
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-content h3 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .modal-content p {
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .modal-content a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .modal-content a:hover {
+            text-decoration: underline;
+        }
+
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .tab:hover {
+            background: #f0f0f0;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: var(--text-dark);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .submit-button {
+            background: var(--primary);
+            color: var(--text-dark);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            width: 100%;
+        }
+
+        .submit-button:hover {
+            background: #e68a00;
+        }
+
+        @media (max-width: 768px) {
+            .header-left, .header-right {
+                gap: 0.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .deals-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .deal-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .deals-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-left">
+            <div class="logo">
+                <img src="img/logo.png" alt="Omnia Store Logo">
+                Omnia Store
+            </div>
+            <nav class="nav-links">
+                <a href="project.html">Home</a>
+                <a href="TodaysDeal.html" class="active">Today's Deals</a>
+                <a href="CustomerService.html">Customer Service</a>
+            </nav>
+        </div>
+        <div style="flex-grow: 1; margin: 0 1rem;">
+            <input type="text" id="search" placeholder="Search deals or products..." />
+            <button class="search-button" onclick="handleSearch()">Search</button>
+        </div>
+        <div class="header-right">
+            <div id="user-menu">
+                <span id="user-greeting">Hello, Sign in</span>
+                <div id="user-dropdown">
+                    <a href="#" id="login-link" onclick="showLoginModal()">Sign In</a>
+                    <a href="#" id="register-link" onclick="showRegisterModal()">Register</a>
+                    <a href="project.html#profile" id="profile-link" style="display: none;">Your Profile</a>
+                    <a href="project.html#profile" id="orders-link" style="display: none;">Your Orders</a>
+                    <a href="#" id="logout-link" style="display: none;" onclick="logout()">Sign Out</a>
+                </div>
+            </div>
+            <div id="cart">
+                🛒 <span id="cart-count">0</span> - $<span id="cart-total">0.00</span>
+                <div id="cart-dropdown">
+                    <div id="cart-items">
+                        <!-- Cart items will be added here dynamically -->
+                    </div>
+                    <div class="cart-summary">
+                        <div class="cart-summary-row">
+                            <span>Subtotal (0 items):</span>
+                            <span>$<span id="cart-subtotal">0.00</span></span>
+                        </div>
+                        <button class="checkout-button" onclick="checkout()">Proceed to Checkout</button>
+                    </div>
+                    <div class="saved-items-section">
+                        <h4>Saved for Later</h4>
+                        <div id="saved-items">
+                            <!-- Saved items will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button id="dark-mode-toggle">🌙</button>
+        </div>
+    </header>
+
+    <!-- Category Navigation -->
+    <div id="category-nav">
+        <a href="#" data-category="" class="active">All</a>
+        <a href="#" data-category="clothing">Clothing</a>
+        <a href="#" data-category="electronics">Electronics</a>
+        <a href="#" data-category="home">Home</a>
+        <a href="#" data-category="books">Books</a>
+        <a href="#" data-category="beauty">Beauty</a>
+        <a href="#" data-category="sports">Sports</a>
+        <a href="#" data-category="toys">Toys</a>
+    </div>
+
+    <!-- Today's Deals Content -->
+    <div class="deals-container">
+        <div class="deals-header">
+            <h1 class="deals-title">Today's Deals</h1>
+            <div class="time-left" id="time-left">Ends in 12:34:56</div>
+        </div>
+
+        <div class="deal-cards" id="deal-cards">
+            <!-- Deals will be added dynamically -->
+        </div>
+    </div>
+
+    <!-- Add to Cart Confirmation Modal -->
+    <div id="add-to-cart-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Added to Cart</h3>
+                <button class="close-button" onclick="closeModal('add-to-cart-modal')">×</button>
+            </div>
+            <p><strong id="added-item-name"></strong> has been added to your cart.</p>
+            <p><a href="#" onclick="document.getElementById('cart').dispatchEvent(new Event('mouseenter')); closeModal('add-to-cart-modal')">View Cart</a></p>
+            <p><a href="#" onclick="closeModal('add-to-cart-modal')">Continue Shopping</a></p>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Sign In</h2>
+                <button class="close-button" onclick="closeModal('login-modal')">×</button>
+            </div>
+            <div class="tab-container">
+                <div class="tab active" onclick="switchTab('login', 'login-tab')">Sign In</div>
+                <div class="tab" onclick="switchTab('login', 'register-tab')">Create Account</div>
+            </div>
+            <div id="login-tab" class="tab-content active">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="Enter your password">
+                </div>
+                <button class="submit-button" onclick="login()">Sign In</button>
+            </div>
+            <div id="register-tab" class="tab-content">
+                <div class="form-group">
+                    <label for="register-name">Name</label>
+                    <input type="text" id="register-name" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" placeholder="Create a password">
+                </div>
+                <button class="submit-button" onclick="register()">Create Account</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let state = {
+            cart: JSON.parse(localStorage.getItem("cart")) || [],
+            saveForLater: JSON.parse(localStorage.getItem("saveForLater")) || [],
+            user: JSON.parse(localStorage.getItem("user")) || null,
+            darkMode: localStorage.getItem("darkMode") === "true",
+            deals: JSON.parse(localStorage.getItem("deals")) || [
+                {
+                    id: "deal1",
+                    name: "Running Sneakers - Limited Time Offer",
+                    category: "clothing",
+                    image: "img/sneaker.jpg",
+                    price: 59.99,
+                    originalPrice: 89.99,
+                    discount: 33,
+                    claimed: 72
+                },
+                {
+                    id: "deal2",
+                    name: "Wireless Headphones - Noise Cancelling",
+                    category: "electronics",
+                    image: "img/headphone.jpg",
+                    price: 99.99,
+                    originalPrice: 129.99,
+                    discount: 23,
+                    claimed: 58
+                },
+                {
+                    id: "deal3",
+                    name: "Smart Watch with Fitness Tracking",
+                    category: "electronics",
+                    image: "img/tracker.jpg",
+                    price: 149.99,
+                    originalPrice: 199.99,
+                    discount: 25,
+                    claimed: 82
+                },
+                {
+                    id: "deal4",
+                    name: "Premium Yoga Mat - Non Slip",
+                    category: "sports",
+                    image: "img/mat.jpg",
+                    price: 19.99,
+                    originalPrice: 29.99,
+                    discount: 33,
+                    claimed: 45
+                },
+                {
+                    id: "deal5",
+                    name: "High-Speed Blender - 5 Settings",
+                    category: "home",
+                    image: "img/blender.jpg",
+                    price: 34.99,
+                    originalPrice: 49.99,
+                    discount: 30,
+                    claimed: 67
+                },
+                {
+                    id: "deal6",
+                    name: "Bestselling Novel - Limited Stock",
+                    category: "books",
+                    image: "img/novel.jpg",
+                    price: 9.99,
+                    originalPrice: 12.99,
+                    discount: 23,
+                    claimed: 91
+                }
+            ]
+        };
+
+        // DOM elements
+        const elements = {
+            cartCount: document.getElementById("cart-count"),
+            cartTotal: document.getElementById("cart-total"),
+            cartSubtotal: document.getElementById("cart-subtotal"),
+            cartItems: document.getElementById("cart-items"),
+            savedItems: document.getElementById("saved-items"),
+            userGreeting: document.getElementById("user-greeting"),
+            loginLink: document.getElementById("login-link"),
+            registerLink: document.getElementById("register-link"),
+            profileLink: document.getElementById("profile-link"),
+            ordersLink: document.getElementById("orders-link"),
+            logoutLink: document.getElementById("logout-link"),
+            searchInput: document.getElementById("search"),
+            darkModeToggle: document.getElementById("dark-mode-toggle"),
+            dealCards: document.getElementById("deal-cards"),
+            timeLeft: document.getElementById("time-left"),
+            categoryNav: document.getElementById("category-nav")
+        };
+
+        // Initialize the app
+        function init() {
+            localStorage.setItem("deals", JSON.stringify(state.deals));
+            updateCartDisplay();
+            updateUserDisplay();
+            renderDeals("");
+            startCountdown();
+            if (state.darkMode) {
+                document.body.classList.add("dark");
+                elements.darkModeToggle.textContent = "☀️";
+            }
+            elements.darkModeToggle.addEventListener("click", toggleDarkMode);
+            elements.searchInput.addEventListener("input", handleSearchInput);
+            elements.categoryNav.addEventListener("click", handleCategoryFilter);
+        }
+
+        // Update cart display
+        function updateCartDisplay() {
+            let totalItems = 0;
+            let totalPrice = 0;
+            
+            state.cart.forEach(item => {
+                totalItems += item.quantity;
+                totalPrice += item.price * item.quantity;
+            });
+            
+            elements.cartCount.textContent = totalItems;
+            elements.cartTotal.textContent = totalPrice.toFixed(2);
+            elements.cartSubtotal.textContent = totalPrice.toFixed(2);
+            
+            elements.cartItems.innerHTML = "";
+            if (state.cart.length === 0) {
+                elements.cartItems.innerHTML = "<p>Your cart is empty</p>";
+            } else {
+                state.cart.forEach((item, index) => {
+                    const cartItemEl = document.createElement("div");
+                    cartItemEl.className = "cart-item";
+                    cartItemEl.innerHTML = `
+                        <img src="${item.image}" alt="${item.name}">
+                        <div class="cart-item-info">
+                            <div>${item.name}</div>
+                            <div class="product-price">$${item.price.toFixed(2)}</div>
+                            <div class="cart-item-controls">
+                                <button onclick="event.stopPropagation(); updateQuantity(${index}, -1)">-</button>
+                                <span class="cart-item-quantity">${item.quantity}</span>
+                                <button onclick="event.stopPropagation(); updateQuantity(${index}, 1)">+</button>
+                                <button class="remove-item" onclick="event.stopPropagation(); removeItem(${index})">Delete</button>
+                                <button class="save-for-later" onclick="event.stopPropagation(); moveToSaveForLater(${index})">Save for Later</button>
+                            </div>
+                        </div>
+                        <div class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+                    `;
+                    elements.cartItems.appendChild(cartItemEl);
+                });
+            }
+            
+            elements.cartItems.parentElement.querySelector('.cart-summary-row span:first-child').textContent = 
+                `Subtotal (${totalItems} ${totalItems === 1 ? 'item' : 'items'}):`;
+            
+            elements.savedItems.innerHTML = "";
+            if (state.saveForLater.length === 0) {
+                elements.savedItems.innerHTML = "<p>No items saved for later</p>";
+            } else {
+                state.saveForLater.forEach((item, index) => {
+                    const savedItemEl = document.createElement("div");
+                    savedItemEl.className = "saved-item";
+                    savedItemEl.innerHTML = `
+                        <img src="${item.image}" alt="${item.name}">
+                        <div class="saved-item-info">
+                            <div>${item.name}</div>
+                            <div class="saved-item-price">$${item.price.toFixed(2)}</div>
+                            <div class="saved-item-controls">
+                                <button class="move-to-cart" onclick="event.stopPropagation(); moveToCart(${index})">Move to Cart</button>
+                                <button class="remove-item" onclick="event.stopPropagation(); removeFromSaveForLater(${index})">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    elements.savedItems.appendChild(savedItemEl);
+                });
+            }
+        }
+
+        // Update quantity in cart
+        function updateQuantity(index, change) {
+            const newQuantity = state.cart[index].quantity + change;
+            if (newQuantity < 1) {
+                removeItem(index);
+                return;
+            }
+            state.cart[index].quantity = newQuantity;
+            localStorage.setItem("cart", JSON.stringify(state.cart));
+            updateCartDisplay();
+        }
+
+        // Remove item from cart
+        function removeItem(index) {
+            state.cart.splice(index, 1);
+            localStorage.setItem("cart", JSON.stringify(state.cart));
+            updateCartDisplay();
+            if (state.cart.length === 0 && state.saveForLater.length === 0) {
+                document.getElementById("cart-dropdown").style.display = "none";
+            }
+        }
+
+        // Move item to Save for Later
+        function moveToSaveForLater(index) {
+            if (!state.user) {
+                showLoginModal();
+                return;
+            }
+            const item = state.cart[index];
+            state.cart.splice(index, 1);
+            state.saveForLater.push({ ...item, quantity: 1 });
+            localStorage.setItem("cart", JSON.stringify(state.cart));
+            localStorage.setItem("saveForLater", JSON.stringify(state.saveForLater));
+            updateCartDisplay();
+        }
+
+        // Move item from Save for Later to Cart
+        function moveToCart(index) {
+            if (!state.user) {
+                showLoginModal();
+                return;
+            }
+            const item = state.saveForLater[index];
+            state.saveForLater.splice(index, 1);
+            const existingItem = state.cart.find(cartItem => cartItem.productId === item.productId);
+            if (existingItem) {
+                existingItem.quantity += item.quantity;
+            } else {
+                state.cart.push({ ...item });
+            }
+            localStorage.setItem("cart", JSON.stringify(state.cart));
+            localStorage.setItem("saveForLater", JSON.stringify(state.saveForLater));
+            updateCartDisplay();
+        }
+
+        // Remove item from Save for Later
+        function removeFromSaveForLater(index) {
+            state.saveForLater.splice(index, 1);
+            localStorage.setItem("saveForLater", JSON.stringify(state.saveForLater));
+            updateCartDisplay();
+            if (state.cart.length === 0 && state.saveForLater.length === 0) {
+                document.getElementById("cart-dropdown").style.display = "none";
+            }
+        }
+
+        // Checkout process
+        function checkout() {
+            if (!state.user) {
+                showLoginModal();
+                return;
+            }
+            if (state.cart.length === 0) {
+                alert("Your cart is empty!");
+                return;
+            }
+            const newOrder = {
+                id: "ORD-" + Math.floor(Math.random() * 100000),
+                date: new Date().toISOString().split('T')[0],
+                status: "processing",
+                items: [...state.cart],
+                total: state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+            };
+            if (!state.user.orders) {
+                state.user.orders = [];
+            }
+            state.user.orders.unshift(newOrder);
+            localStorage.setItem("user", JSON.stringify(state.user));
+            state.cart = [];
+            localStorage.setItem("cart", JSON.stringify(state.cart));
+            updateCartDisplay();
+            alert(`Order #${newOrder.id} placed successfully! Total: $${newOrder.total.toFixed(2)}`);
+        }
+
+        // Update user display
+        function updateUserDisplay() {
+            if (state.user) {
+                elements.userGreeting.textContent = `Hello, ${state.user.name.split(' ')[0]}`;
+                elements.loginLink.style.display = "none";
+                elements.registerLink.style.display = "none";
+                elements.profileLink.style.display = "block";
+                elements.ordersLink.style.display = "block";
+                elements.logoutLink.style.display = "block";
+            } else {
+                elements.userGreeting.textContent = "Hello, Sign in";
+                elements.loginLink.style.display = "block";
+                elements.registerLink.style.display = "block";
+                elements.profileLink.style.display = "none";
+                elements.ordersLink.style.display = "none";
+                elements.logoutLink.style.display = "none";
+            }
+        }
+
+        // Toggle dark mode
+        function toggleDarkMode() {
+            state.darkMode = !state.darkMode;
+            document.body.classList.toggle("dark");
+            elements.darkModeToggle.textContent = state.darkMode ? "☀️" : "🌙";
+            localStorage.setItem("darkMode", state.darkMode);
+        }
+
+        // Show login modal
+        function showLoginModal() {
+            document.getElementById("login-modal").style.display = "flex";
+            switchTab('login', 'login-tab');
+        }
+
+        // Show register modal
+        function showRegisterModal() {
+            document.getElementById("login-modal").style.display = "flex";
+            switchTab('login', 'register-tab');
+        }
+
+        // Login function
+        function login() {
+            const email = document.getElementById("login-email").value;
+            const password = document.getElementById("login-password").value;
+            if (!email || !password) {
+                alert("Please enter both email and password");
+                return;
+            }
+            let user = JSON.parse(localStorage.getItem("user")) || { email, name: email.split('@')[0], password };
+            if (user.password !== password) {
+                alert("Invalid email or password");
+                return;
+            }
+            state.user = user;
+            localStorage.setItem("user", JSON.stringify(user));
+            updateUserDisplay();
+            closeModal("login");
+        }
+
+        // Register function
+        function register() {
+            const name = document.getElementById("register-name").value;
+            const email = document.getElementById("register-email").value;
+            const password = document.getElementById("register-password").value;
+            if (!name || !email || !password) {
+                alert("Please fill in all fields");
+                return;
+            }
+            if (password.length < 6) {
+                alert("Password must be at least 6 characters");
+                return;
+            }
+            const existingUser = JSON.parse(localStorage.getItem("user"));
+            if (existingUser && existingUser.email === email) {
+                alert("User already exists. Please sign in.");
+                switchTab('login', 'login-tab');
+                return;
+            }
+            const newUser = {
+                name,
+                email,
+                password,
+                orders: []
+            };
+            state.user = newUser;
+            localStorage.setItem("user", JSON.stringify(newUser));
+            updateUserDisplay();
+            closeModal("login");
+        }
+
+        // Logout function
+        function logout() {
+            state.user = null;
+            localStorage.removeItem("user");
+            updateUserDisplay();
+        }
+
+        // Switch between tabs
+        function switchTab(modalId, tabId) {
+            const modal = document.getElementById(modalId + "-modal");
+            modal.querySelectorAll(".tab").forEach(tab => {
+                tab.classList.remove("active");
+            });
+            modal.querySelector(`.tab[onclick*="${tabId}"]`).classList.add("active");
+            modal.querySelectorAll(".tab-content").forEach(content => {
+                content.classList.remove("active");
+            });
+            document.getElementById(tabId).classList.add("active");
+        }
+
+        // Show modal
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = "flex";
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+
+        // Render deals
+        function renderDeals(category) {
+            elements.dealCards.innerHTML = "";
+            const filteredDeals = category ? state.deals.filter(deal => deal.category === category) : state.deals;
+            if (filteredDeals.length === 0) {
+                elements.dealCards.innerHTML = "<p>No deals found for this category.</p>";
+                return;
+            }
+            filteredDeals.forEach(deal => {
+                const dealCard = document.createElement("div");
+                dealCard.className = "deal-card";
+                dealCard.innerHTML = `
+                    <img src="${deal.image}" alt="${deal.name}" class="deal-image">
+                    <div class="deal-info">
+                        <div class="deal-price">$${deal.price.toFixed(2)} <span class="deal-original-price">$${deal.originalPrice.toFixed(2)}</span></div>
+                        <div class="deal-discount">${deal.discount}% OFF</div>
+                        <h3 class="deal-title">${deal.name}</h3>
+                        <div class="deal-claimed">${deal.claimed}% claimed</div>
+                        <button class="deal-button" onclick="addToCart('${deal.id}')">Add to Cart</button>
+                    </div>
+                `;
+                elements.dealCards.appendChild(dealCard);
+            });
+        }
+
+        // Add to cart
+        function addToCart(dealId) {
+            if (!state.user) {
+                showLoginModal();
+                return;
+            }
+            const deal = state.deals.find(d => d.id === dealId);
+            if (!deal) return;
+            const existingItem = state.cart.find(item => item.productId === dealId);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                state.cart.push({
+                    productId: deal.id,
+                    name: deal.name,
+                    image: deal.image,
+                    price: deal.price,
+                    quantity: 1,
+                    category: deal.category
+                });
+            }
+            deal.claimed = Math.min(deal.claimed + 5, 100); // Simulate increasing claimed percentage
+            localStorage.setItem("cart", JSON.stringify(state.cart));
+            localStorage.setItem("deals", JSON.stringify(state.deals));
+            updateCartDisplay();
+            document.getElementById("added-item-name").textContent = deal.name;
+            showModal("add-to-cart-modal");
+            elements.cartCount.classList.add("animated");
+            setTimeout(() => elements.cartCount.classList.remove("animated"), 500);
+        }
+
+        // Start countdown timer
+        function startCountdown() {
+            const endTime = new Date();
+            endTime.setHours(23, 59, 59, 999); // Set to end of day
+            function updateTimer() {
+                const now = new Date();
+                const timeDiff = endTime - now;
+                if (timeDiff <= 0) {
+                    elements.timeLeft.textContent = "Deals ended";
+                    return;
+                }
+                const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+                const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+                elements.timeLeft.textContent = `Ends in ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                if (timeDiff < 1000 * 60 * 10) { // Less than 10 minutes
+                    elements.timeLeft.classList.add("urgent");
+                } else {
+                    elements.timeLeft.classList.remove("urgent");
+                }
+            }
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        }
+
+        // Handle category filter
+        function handleCategoryFilter(e) {
+            e.preventDefault();
+            const category = e.target.getAttribute("data-category");
+            elements.categoryNav.querySelectorAll("a").forEach(link => link.classList.remove("active"));
+            e.target.classList.add("active");
+            renderDeals(category);
+        }
+
+        // Handle search
+        function handleSearchInput(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            elements.dealCards.innerHTML = "";
+            const filteredDeals = state.deals.filter(deal => deal.name.toLowerCase().includes(searchTerm));
+            if (filteredDeals.length === 0) {
+                elements.dealCards.innerHTML = `<p>No deals found. Try searching products on the <a href="project.html?search=${encodeURIComponent(searchTerm)}">home page</a>.</p>`;
+                return;
+            }
+            filteredDeals.forEach(deal => {
+                const dealCard = document.createElement("div");
+                dealCard.className = "deal-card";
+                dealCard.innerHTML = `
+                    <img src="${deal.image}" alt="${deal.name}" class="deal-image">
+                    <div class="deal-info">
+                        <div class="deal-price">$${deal.price.toFixed(2)} <span class="deal-original-price">$${deal.originalPrice.toFixed(2)}</span></div>
+                        <div class="deal-discount">${deal.discount}% OFF</div>
+                        <h3 class="deal-title">${deal.name}</h3>
+                        <div class="deal-claimed">${deal.claimed}% claimed</div>
+                        <button class="deal-button" onclick="addToCart('${deal.id}')">Add to Cart</button>
+                    </div>
+                `;
+                elements.dealCards.appendChild(dealCard);
+            });
+        }
+
+        // Handle search button click
+        function handleSearch() {
+            const searchTerm = elements.searchInput.value;
+            if (!searchTerm) return;
+            const filteredDeals = state.deals.filter(deal => deal.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            if (filteredDeals.length === 0) {
+                window.location.href = `project.html?search=${encodeURIComponent(searchTerm)}`;
+            } else {
+                renderDeals("");
+                elements.searchInput.value = searchTerm;
+                handleSearchInput({ target: elements.searchInput });
+            }
+        }
+
+        // Initialize the app
+        document.addEventListener("DOMContentLoaded", init);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93e98830de9b453b',t:'MTc0NzA0ODg4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
+
+</html>
