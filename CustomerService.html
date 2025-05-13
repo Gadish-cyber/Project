@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Service - Omnia Store</title>
+    <link rel="icon" type="image/png" href="img/logo.png">
+    <style>
+        :root {
+            --primary: #ff9900;
+            --secondary: #146eb4;
+            --light-bg: #f7f7f7;
+            --dark-bg: #131921;
+            --dark-secondary: #232f3e;
+            --text-light: #ffffff;
+            --text-dark: #111;
+            --card-bg-light: #ffffff;
+            --card-bg-dark: #1e1e1e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Amazon Ember', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--light-bg);
+            color: var(--text-dark);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark {
+            background: #121212;
+            color: #e0e0e0;
+            --light-bg: #121212;
+            --text-dark: #e0e0e0;
+            --card-bg-light: #1e1e1e;
+        }
+
+        header {
+            background: var(--dark-bg);
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left, .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .logo img {
+            height: 32px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.5rem;
+            border-radius: 3px;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #search {
+            flex-grow: 1;
+            max-width: 600px;
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .search-button {
+            background: var(--primary);
+            color: var(--text-dark);
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+        }
+
+        #user-menu {
+            position: relative;
+        }
+
+        #user-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: var(--card-bg-light);
+            color: var(--text-dark);
+            min-width: 200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            padding: 0.5rem;
+            z-index: 10;
+        }
+
+        #user-menu:hover #user-dropdown {
+            display: block;
+        }
+
+        #user-dropdown a {
+            display: block;
+            padding: 0.5rem;
+            color: var(--text-dark);
+            text-decoration: none;
+        }
+
+        #user-dropdown a:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        #cart {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            position: relative;
+        }
+
+        #cart-count {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        #cart-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: var(--card-bg-light);
+            color: var(--text-dark);
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            padding: 1rem;
+            z-index: 10;
+        }
+
+        #cart:hover #cart-dropdown {
+            display: block;
+        }
+
+        .cart-item, .saved-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item img, .saved-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+        }
+
+        .cart-item-info, .saved-item-info {
+            flex-grow: 1;
+        }
+
+        .cart-item-price, .saved-item-price {
+            font-weight: bold;
+        }
+
+        .cart-item-controls, .saved-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .cart-item-controls button, .saved-item-controls button {
+            background: var(--light-bg);
+            border: 1px solid #ddd;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .cart-item-controls button:hover, .saved-item-controls button:hover {
+            background: #e0e0e0;
+        }
+
+        .cart-item-quantity, .saved-item-quantity {
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .remove-item, .save-for-later, .move-to-cart {
+            color: #d32f2f;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        .save-for-later, .move-to-cart {
+            color: var(--secondary);
+        }
+
+        .remove-item:hover, .save-for-later:hover, .move-to-cart:hover {
+            text-decoration: underline;
+        }
+
+        .cart-summary {
+            padding: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .cart-summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .saved-items-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .saved-items-section h4 {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .checkout-button {
+            background: var(--primary);
+            color: var(--text-dark);
+            border: none;
+            padding: 0.5rem 1rem;
+            width: 100%;
+            margin-top: 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        #category-nav {
+            background: var(--dark-secondary);
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+        }
+
+        #category-nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            white-space: nowrap;
+            padding: 0.5rem;
+        }
+
+        #category-nav a:hover {
+            text-decoration: underline;
+        }
+
+        .service-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .service-header {
+            margin-bottom: 2rem;
+        }
+
+        .service-title {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .help-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .help-card {
+            background: var(--card-bg-light);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .help-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .help-card h3 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .help-card ul {
+            list-style-type: none;
+        }
+
+        .help-card li {
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .help-card li:hover {
+            color: var(--primary);
+        }
+
+        .help-card li:before {
+            content: "•";
+            color: var(--primary);
+            position: absolute;
+            left: 0;
+        }
+
+        .track-order {
+            background: var(--card-bg-light);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .track-order.active {
+            display: block;
+        }
+
+        .track-order h2 {
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .order-status {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 4px;
+            background: #f5f5f5;
+        }
+
+        .status-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-step.completed {
+            color: #388e3c;
+        }
+
+        .status-step.current {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .status-step .icon {
+            margin-right: 0.5rem;
+        }
+
+        .contact-form {
+            background: var(--card-bg-light);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .contact-form h2 {
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .submit-button {
+            background: var(--primary);
+            color: var(--text-dark);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background: #e68a00;
+        }
+
+        #dark-mode-toggle {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--card-bg-light);
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-content h3 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .modal-content p {
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .modal-content a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .modal-content a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header-left, .header-right {
+                gap: 0.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .help-sections {
+                grid-template-columns: 1fr;
+            }
+
+            .service-container {
+                padding: 1rem;
+            }
+
+            .contact-form {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-left">
+            <div class="logo">
+                <img src="img/logo.png" alt="Omnia Store Logo">
+                Omnia Store
+            </div>
+            <nav class="nav-links">
+                <a href="project.html">Home</a>
+                <a href="TodaysDeal.html">Today's Deals</a>
+                <a href="CustomerService.html" class="active">Customer Service</a>
+            </nav>
+        </div>
+        <div style="flex-grow: 1; margin: 0 1rem;">
+            <input type="text" id="search" placeholder="Search help topics or products..." />
+            <button class="search-button" onclick="handleSearch()">Search</button>
+        </div>
+        <div class="header-right">
+            <div id="user-menu">
+                <span id="user-greeting">Hello, Sign in</span>
+                <div id="user-dropdown">
+                    <a href="#" id="login-link" onclick="showLoginModal()">Sign In</a>
+                    <a href="#" id="register-link" onclick="showRegisterModal()">Register</a>
+                    <a href="project.html#profile" id="profile-link" style="display: none;">Your Profile</a>
+                    <a href="project.html#profile" id="orders-link" style="display: none;">Your Orders</a>
+                    <a href="#" id="logout-link" style="display: none;" onclick="logout()">Sign Out</a>
+                </div>
+            </div>
+            <div id="cart">
+                🛒 <span id="cart-count">0</span> - $<span id="cart-total">0.00</span>
+                <div id="cart-dropdown">
+                    <div id="cart-items">
+                        <!-- Cart items will be added here dynamically -->
+                    </div>
+                    <div class="cart-summary">
+                        <div class="cart-summary-row">
+                            <span>Subtotal (0 items):</span>
+                            <span>$<span id="cart-subtotal">0.00</span></span>
+                        </div>
+                        <button class="checkout-button" onclick="checkout()">Proceed to Checkout</button>
+                    </div>
+                    <div class="saved-items-section">
+                        <h4>Saved for Later</h4>
+                        <div id="saved-items">
+                            <!-- Saved items will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button id="dark-mode-toggle">🌙</button>
+        </div>
+    </header>
+
+    <!-- Category Navigation -->
+    <div id="category-nav">
+        <a href="#" data-category="">All</a>
+        <a href="#" data-category="clothing">Clothing</a>
+        <a href="#" data-category="electronics">Electronics</a>
+        <a href="#" data-category="home">Home</a>
+        <a href="#" data-category="books">Books</a>
+        <a href="#" data-category="beauty">Beauty</a>
+        <a href="#" data-category="sports">Sports</a>
+        <a href="#" data-category="toys">Toys</a>
+    </div>
+
+    <!-- Customer Service Content -->
+    <div class="service-container">
+        <div class="service-header">
+            <h1 class="service-title">Customer Service</h1>
+            <p>We're here to help with any questions or issues you may have.</p>
+        </div>
+
+        <div class="help-sections" id="help-sections">
+            <div class="help-card">
+                <h3>Order Help</h3>
+                <ul>
+                    <li onclick="showTrackOrder()">Track your order</li>
+                    <li onclick="showModal('cancel-order-modal')">Cancel or change order</li>
+                    <li onclick="showModal('returns-modal')">Returns & refunds</li>
+                    <li onclick="showModal('shipping-modal')">Shipping information</li>
+                    <li onclick="showModal('international-modal')">International orders</li>
+                </ul>
+            </div>
+
+            <div class="help-card">
+                <h3>Payment & Pricing</h3>
+                <ul>
+                    <li onclick="showModal('payment-modal')">Payment options</li>
+                    <li onclick="showModal('gift-card-modal')">Gift cards & vouchers</li>
+                    <li onclick="showModal('pricing-modal')">Pricing & promotions</li>
+                    <li onclick="showModal('tax-modal')">Tax information</li>
+                    <li onclick="showModal('billing-modal')">Billing questions</li>
+                </ul>
+            </div>
+
+            <div class="help-card">
+                <h3>Account & Security</h3>
+                <ul>
+                    <li onclick="goToProfile()">Manage your account</li>
+                    <li onclick="showModal('password-modal')">Password reset</li>
+                    <li onclick="showModal('privacy-modal')">Privacy & security</li>
+                    <li onclick="showModal('two-step-modal')">Two-step verification</li>
+                    <li onclick="showModal('close-account-modal')">Close your account</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Order Tracking Section -->
+        <div id="track-order" class="track-order">
+            <h2>Track Your Order</h2>
+            <div class="form-group">
+                <label for="order-number">Order Number</label>
+                <input type="text" id="order-number" placeholder="Enter your order number">
+            </div>
+            <div class="form-group">
+                <label for="order-email">Email Address</label>
+                <input type="email" id="order-email" placeholder="Enter your email address">
+            </div>
+            <button class="submit-button" onclick="trackOrder()">Track Order</button>
+            
+            <div id="order-status-result" class="order-status" style="display: none;">
+                <h3>Order Status</h3>
+                <div id="status-steps">
+                    <!-- Dynamic status steps will be added here -->
+                </div>
+                <div id="order-details" style="margin-top: 1rem;">
+                    <!-- Order details will be added here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="contact-form">
+            <h2>Contact Us</h2>
+            <form id="support-form">
+                <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <select id="subject" required>
+                        <option value="">Select a topic</option>
+                        <option value="order">Order Issue</option>
+                        <option value="return">Return/Refund</option>
+                        <option value="product">Product Question</option>
+                        <option value="account">Account Help</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" required></textarea>
+                </div>
+                <button type="submit" class="submit-button">Send Message</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="cancel-order-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Cancel or Change Order</h3>
+                <button class="close-button" onclick="closeModal('cancel-order-modal')">×</button>
+            </div>
+            <p>Orders can be canceled within 24 hours of placement. To modify or cancel, please contact support with your order number.</p>
+            <p><a href="#" onclick="showContactForm()">Contact Support</a></p>
+        </div>
+    </div>
+
+    <div id="returns-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Returns & Refunds</h3>
+                <button class="close-button" onclick="closeModal('returns-modal')">×</button>
+            </div>
+            <p>Our return policy allows returns within 30 days of purchase. Items must be in original condition.</p>
+            <p><a href="#" onclick="showContactForm()">Start a Return</a></p>
+        </div>
+    </div>
+
+    <div id="shipping-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Shipping Information</h3>
+                <button class="close-button" onclick="closeModal('shipping-modal')">×</button>
+            </div>
+            <p>Standard shipping takes 3-5 business days. Express shipping (1-2 days) is available for an additional fee.</p>
+            <p>Track your order for real-time updates.</p>
+            <p><a href="#" onclick="showTrackOrder()">Track Order</a></p>
+        </div>
+    </div>
+
+    <div id="international-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>International Orders</h3>
+                <button class="close-button" onclick="closeModal('international-modal')">×</button>
+            </div>
+            <p>We ship to most countries worldwide. Customs fees and duties may apply, depending on your location.</p>
+            <p><a href="#" onclick="showContactForm()">Contact Support for Details</a></p>
+        </div>
+    </div>
+
+    <div id="payment-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Payment Options</h3>
+                <button class="close-button" onclick="closeModal('payment-modal')">×</button>
+            </div>
+            <p>We accept credit/debit cards, PayPal, and Omnia Store gift cards.</p>
+            <p><a href="#" onclick="showContactForm()">Contact Support for Payment Issues</a></p>
+        </div>
+    </div>
+
+    <div id="gift-card-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Gift Cards & Vouchers</h3>
+                <button class="close-button" onclick="closeModal('gift-card-modal')">×</button>
+            </div>
+            <p>Purchase or redeem gift cards through your account. Vouchers can be applied at checkout.</p>
+            <p><a href="project.html#profile">Manage Gift Cards</a></p>
+        </div>
+    </div>
+
+    <div id="pricing-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Pricing & Promotions</h3>
+                <button class="close-button" onclick="closeModal('pricing-modal')">×</button>
+            </div>
+            <p>Prices are subject to change. Promotions and discounts are applied automatically at checkout.</p>
+            <p><a href="TodaysDeal.html">View Today's Deals</a></p>
+        </div>
+    </div>
+
+    <div id="tax-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tax Information</h3>
+                <button class="close-button" onclick="closeModal('tax-modal')">×</button>
+            </div>
+            <p>Taxes are calculated based on your shipping address and local regulations.</p>
+            <p><a href="#" onclick="showContactForm()">Contact Support for Tax Questions</a></p>
+        </div>
+    </div>
+
+    <div id="billing-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Billing Questions</h3>
+                <button class="close-button" onclick="closeModal('billing-modal')">×</button>
+            </div>
+            <p>View your billing history in your account. For discrepancies, contact support.</p>
+            <p><a href="#" onclick="showContactForm()">Contact Support</a></p>
+        </div>
+    </div>
+
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Password Reset</h3>
+                <button class="close-button" onclick="closeModal('password-modal')">×</button>
+            </div>
+            <p>Request a password reset link via email. Check your inbox for instructions.</p>
+            <p><a href="#" onclick="showContactForm()">Request Reset Link</a></p>
+        </div>
+    </div>
+
+    <div id="privacy-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Privacy & Security</h3>
+                <button class="close-button" onclick="closeModal('privacy-modal')">×</button>
+            </div>
+            <p>Your data is protected with industry-standard encryption. Review our privacy policy for details.</p>
+            <p><a href="#" onclick="showContactForm()">Contact Support for Privacy Concerns</a></p>
+        </div>
+    </div>
+
+    <div id="two-step-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Two-Step Verification</h3>
+                <button class="close-button" onclick="closeModal('two-step-modal')">×</button>
+            </div>
+            <p>Enable two-step verification in your account settings for added security.</p>
+            <p><a href="project.html#profile">Go to Account Settings</a></p>
+        </div>
+    </div>
+
+    <div id="close-account-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Close Your Account</h3>
+                <button class="close-button" onclick="closeModal('close-account-modal')">×</button>
+            </div>
+            <p>Closing your account is permanent. Contact support to proceed.</p>
+            <p><a href="#" onclick="showContactForm()">Contact Support</a></p>
+        </div>
+    </div>
+
+    <!-- Contact Confirmation Modal -->
+    <div id="contact-confirmation-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Message Sent</h3>
+                <button class="close-button" onclick="closeModal('contact-confirmation-modal')">×</button>
+            </div>
+            <p>Your message has been received. Your ticket number is <strong id="ticket-number"></strong>.</p>
+            <p>We'll respond to your inquiry within 24-48 hours.</p>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Sign In</h2>
+                <button class="close-button" onclick="closeModal('login-modal')">×</button>
+            </div>
+            <div class="tab-container">
+                <div class="tab active" onclick="switchTab('login', 'login-tab')">Sign In</div>
+                <div class="tab" onclick="switchTab('login', 'register-tab')">Create Account</div>
+            </div>
+            <div id="login-tab" class="tab-content active">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="Enter your password">
+                </div>
+                <button class="submit-button" onclick="login()">Sign In</button>
+            </div>
+            <div id="register-tab" class="tab-content">
+                <div class="form-group">
+                    <label for="register-name">Name</label>
+                    <input type="text" id="register-name" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" placeholder="Create a password">
+                </div>
+                <button class="submit-button" onclick="register()">Create Account</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let state = {
+            cart: JSON.parse(localStorage.getItem("cart")) || [],
+            saveForLater: JSON.parse(localStorage.getItem("saveForLater")) || [],
+            user: JSON.parse(localStorage.getItem("user")) || null,
+            darkMode: localStorage.getItem("darkMode") === "true",
+            supportTickets: JSON.parse(localStorage.getItem("supportTickets")) || []
+        };
+
+        // DOM elements
+        const elements = {
+            cartCount: document.getElementById("cart-count"),
+            cartTotal: document.getElementById("cart-total"),
+            cartSubtotal: document.getElementById("cart-subtotal"),
+            cartItems: document.getElementById("cart-items"),
+            savedItems: document.getElementById("saved-items"),
+            userGreeting: document.getElementById("user-greeting"),
+            loginLink: document.getElementById("login-link"),
+            registerLink: document.getElementById("register-link"),
+            profileLink: document.getElementById("profile-link"),
+            ordersLink: document.getElementById("orders-link"),
+            logoutLink: document.getElementById("logout-link"),
+            searchInput: document.getElementById("search"),
+            darkModeToggle: document.getElementById("dark-mode-toggle"),
+            helpSections: document.getElementById("help-sections")
+        };
+
+        // Initialize the app
+        function init() {
+            updateCartDisplay();
+            updateUserDisplay();
+            if (state.darkMode) {
+                document.body.classList.add("dark");
+                elements.darkModeToggle.textContent = "☀️";
+            }
+            elements.darkModeToggle.addEventListener("click", toggleDarkMode);
+            elements.searchInput.addEventListener("input", handleSearchInput);
+        }
+
+        // Update cart display
+        function updateCartDisplay() {
+            let totalItems = 0;
+            let totalPrice = 0;
+            
+            state.cart.forEach(item => {
+                totalItems += item.quantity;
+                totalPrice += item.price * item.quantity;
+            });
+            
+            elements.cartCount.textContent = totalItems;
+            elements.cartTotal.textContent = totalPrice.toFixed(2);
+            elements.cartSubtotal.textContent = totalPrice.toFixed(2);
+            
+            elements.cartItems.innerHTML = "";
+            if (state.cart.length === 0) {
+                elements.cartItems.innerHTML = "<p>Your cart is empty</p>";
+            } else {
+                state.cart.forEach((item, index) => {
+                    const cartItemEl = document.createElement("div");
+                    cartItemEl.className = "cart-item";
+                    cartItemEl.innerHTML = `
+                        <img src="${item.image}" alt="${item.name}">
+                        <div class="cart-item-info">
+                            <div>${item.name}</div>
+                            <div class="product-price">$${item.price.toFixed(2)}</div>
+                            <div class="cart-item-controls">
+                                <button onclick="event.stopPropagation(); updateQuantity(${index}, -1)">-</button>
+                                <span class="cart-item-quantity">${item.quantity}</span>
+                                <button onclick="event.stopPropagation(); updateQuantity(${index}, 1)">+</button>
+                                <button class="remove-item" onclick="event.stopPropagation(); removeItem(${index})">Delete</button>
+                                <button class="save-for-later" onclick="event.stopPropagation(); moveToSaveForLater(${index})">Save for Later</button>
+                            </div>
+                        </div>
+                        <div class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+                    `;
+                    elements.cartItems.appendChild(cartItemEl);
+                });
+            }
+            
+            elements.cartItems.parentElement.querySelector('.cart-summary-row span:first-child').textContent = 
+                `Subtotal (${totalItems} ${totalItems === 1 ? 'item' : 'items'}):`;
+            
+            elements.savedItems.innerHTML = "";
+            if (state.saveForLater.length === 0) {
+                elements.savedItems.innerHTML = "<p>No items saved for later</p>";
+            } else {
+                state.saveForLater.forEach((item, index) => {
+                    const savedItemEl = document.createElement("div");
+                    savedItemEl.className = "saved-item";
+                    savedItemEl.innerHTML = `
+                        <img src="${item.image}" alt="${item.name}">
+                        <div class="saved-item-info">
+                            <div>${item.name}</div>
+                            <div class="saved-item-price">$${item.price.toFixed(2)}</div>
+                            <div class="saved-item-controls">
+                                <button class="move-to-cart" onclick="event.stopPropagation(); moveToCart(${index})">Move to Cart</button>
+                                <button class="remove-item" onclick="event.stopPropagation(); removeFromSaveForLater(${index})">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    elements.savedItems.appendChild(savedItemEl);
+                });
+            }
+        }
+
+        // Update quantity in cart
+        function updateQuantity(index, change) {
+            const newQuantity = state.cart[index].quantity + change;
+            if (newQuantity < 1) {
+                removeItem(index);
+                return;
+            }
+            state.cart[index].quantity = newQuantity;
+            localStorage.setItem("cart", JSON.stringify(state.cart));
+            updateCartDisplay();
+        }
+
+        // Remove item from cart
+        function removeItem(index) {
+            state.cart.splice(index, 1);
+            localStorage.setItem("cart", JSON.stringify(state.cart));
+            updateCartDisplay();
+            if (state.cart.length === 0 && state.saveForLater.length === 0) {
+                document.getElementById("cart-dropdown").style.display = "none";
+            }
+        }
+
+        // Move item to Save for Later
+        function moveToSaveForLater(index) {
+            if (!state.user) {
+                showLoginModal();
+                return;
+            }
+            const item = state.cart[index];
+            state.cart.splice(index, 1);
+            state.saveForLater.push({ ...item, quantity: 1 });
+            localStorage.setItem("cart", JSON.stringify(state.cart));
+            localStorage.setItem("saveForLater", JSON.stringify(state.saveForLater));
+            updateCartDisplay();
+        }
+
+        // Move item from Save for Later to Cart
+        function moveToCart(index) {
+            if (!state.user) {
+                showLoginModal();
+                return;
+            }
+            const item = state.saveForLater[index];
+            state.saveForLater.splice(index, 1);
+            const existingItem = state.cart.find(cartItem => cartItem.productId === item.productId);
+            if (existingItem) {
+                existingItem.quantity += item.quantity;
+            } else {
+                state.cart.push({ ...item });
+            }
+            localStorage.setItem("cart", JSON.stringify(state.cart));
+            localStorage.setItem("saveForLater", JSON.stringify(state.saveForLater));
+            updateCartDisplay();
+        }
+
+        // Remove item from Save for Later
+        function removeFromSaveForLater(index) {
+            state.saveForLater.splice(index, 1);
+            localStorage.setItem("saveForLater", JSON.stringify(state.saveForLater));
+            updateCartDisplay();
+            if (state.cart.length === 0 && state.saveForLater.length === 0) {
+                document.getElementById("cart-dropdown").style.display = "none";
+            }
+        }
+
+        // Checkout process
+        function checkout() {
+            if (!state.user) {
+                showLoginModal();
+                return;
+            }
+            if (state.cart.length === 0) {
+                alert("Your cart is empty!");
+                return;
+            }
+            const newOrder = {
+                id: "ORD-" + Math.floor(Math.random() * 100000),
+                date: new Date().toISOString().split('T')[0],
+                status: "processing",
+                items: [...state.cart],
+                total: state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+            };
+            if (!state.user.orders) {
+                state.user.orders = [];
+            }
+            state.user.orders.unshift(newOrder);
+            localStorage.setItem("user", JSON.stringify(state.user));
+            state.cart = [];
+            localStorage.setItem("cart", JSON.stringify(state.cart));
+            updateCartDisplay();
+            alert(`Order #${newOrder.id} placed successfully! Total: $${newOrder.total.toFixed(2)}`);
+        }
+
+        // Update user display
+        function updateUserDisplay() {
+            if (state.user) {
+                elements.userGreeting.textContent = `Hello, ${state.user.name.split(' ')[0]}`;
+                elements.loginLink.style.display = "none";
+                elements.registerLink.style.display = "none";
+                elements.profileLink.style.display = "block";
+                elements.ordersLink.style.display = "block";
+                elements.logoutLink.style.display = "block";
+                document.getElementById("order-email").value = state.user.email;
+                document.getElementById("name").value = state.user.name;
+                document.getElementById("email").value = state.user.email;
+            } else {
+                elements.userGreeting.textContent = "Hello, Sign in";
+                elements.loginLink.style.display = "block";
+                elements.registerLink.style.display = "block";
+                elements.profileLink.style.display = "none";
+                elements.ordersLink.style.display = "none";
+                elements.logoutLink.style.display = "none";
+            }
+        }
+
+        // Toggle dark mode
+        function toggleDarkMode() {
+            state.darkMode = !state.darkMode;
+            document.body.classList.toggle("dark");
+            elements.darkModeToggle.textContent = state.darkMode ? "☀️" : "🌙";
+            localStorage.setItem("darkMode", state.darkMode);
+        }
+
+        // Show login modal
+        function showLoginModal() {
+            document.getElementById("login-modal").style.display = "flex";
+            switchTab('login', 'login-tab');
+        }
+
+        // Show register modal
+        function showRegisterModal() {
+            document.getElementById("login-modal").style.display = "flex";
+            switchTab('login', 'register-tab');
+        }
+
+        // Login function
+        function login() {
+            const email = document.getElementById("login-email").value;
+            const password = document.getElementById("login-password").value;
+            if (!email || !password) {
+                alert("Please enter both email and password");
+                return;
+            }
+            let user = JSON.parse(localStorage.getItem("user")) || { email, name: email.split('@')[0], password };
+            if (user.password !== password) {
+                alert("Invalid email or password");
+                return;
+            }
+            state.user = user;
+            localStorage.setItem("user", JSON.stringify(user));
+            updateUserDisplay();
+            closeModal("login");
+        }
+
+        // Register function
+        function register() {
+            const name = document.getElementById("register-name").value;
+            const email = document.getElementById("register-email").value;
+            const password = document.getElementById("register-password").value;
+            if (!name || !email || !password) {
+                alert("Please fill in all fields");
+                return;
+            }
+            if (password.length < 6) {
+                alert("Password must be at least 6 characters");
+                return;
+            }
+            const existingUser = JSON.parse(localStorage.getItem("user"));
+            if (existingUser && existingUser.email === email) {
+                alert("User already exists. Please sign in.");
+                switchTab('login', 'login-tab');
+                return;
+            }
+            const newUser = {
+                name,
+                email,
+                password,
+                orders: []
+            };
+            state.user = newUser;
+            localStorage.setItem("user", JSON.stringify(newUser));
+            updateUserDisplay();
+            closeModal("login");
+        }
+
+        // Logout function
+        function logout() {
+            state.user = null;
+            localStorage.removeItem("user");
+            updateUserDisplay();
+        }
+
+        // Switch between tabs
+        function switchTab(modalId, tabId) {
+            const modal = document.getElementById(modalId + "-modal");
+            modal.querySelectorAll(".tab").forEach(tab => {
+                tab.classList.remove("active");
+            });
+            modal.querySelector(`.tab[onclick*="${tabId}"]`).classList.add("active");
+            modal.querySelectorAll(".tab-content").forEach(content => {
+                content.classList.remove("active");
+            });
+            document.getElementById(tabId).classList.add("active");
+        }
+
+        // Show modal
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = "flex";
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+
+        // Show track order section
+        function showTrackOrder() {
+            document.getElementById('track-order').classList.add('active');
+            document.getElementById('track-order').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Show contact form
+        function showContactForm() {
+            closeModal(document.querySelector('.modal[style*="flex"]').id);
+            document.querySelector('.contact-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Go to profile
+        function goToProfile() {
+            if (!state.user) {
+                showLoginModal();
+                return;
+            }
+            window.location.href = "project.html#profile";
+        }
+
+        // Track order
+        function trackOrder() {
+            const orderNumber = document.getElementById('order-number').value;
+            const email = document.getElementById('order-email').value;
+            if (!orderNumber || !email) {
+                alert('Please enter both order number and email address');
+                return;
+            }
+            if (!state.user || state.user.email !== email) {
+                alert('Please sign in with the correct email or enter the email associated with the order');
+                return;
+            }
+            const order = state.user.orders ? state.user.orders.find(o => o.id === orderNumber) : null;
+            if (!order) {
+                alert('Order not found. Please check the order number.');
+                return;
+            }
+            const statusSteps = [
+                { status: "Order Placed", date: order.date, completed: true },
+                { status: "Order Processed", date: addDays(order.date, 1), completed: order.status !== "processing" },
+                { status: "Shipped", date: addDays(order.date, 2), completed: order.status === "shipped" || order.status === "delivered" },
+                { status: "Out for Delivery", date: addDays(order.date, 3), completed: order.status === "delivered" },
+                { status: "Delivered", date: addDays(order.date, 4), completed: order.status === "delivered" }
+            ];
+            const statusStepsEl = document.getElementById('status-steps');
+            statusStepsEl.innerHTML = "";
+            statusSteps.forEach(step => {
+                const stepEl = document.createElement("div");
+                stepEl.className = `status-step ${step.completed ? 'completed' : ''} ${step.status.toLowerCase() === order.status ? 'current' : ''}`;
+                stepEl.innerHTML = `
+                    <span class="icon">${step.completed ? '✓' : step.status.toLowerCase() === order.status ? '↷' : '○'}</span>
+                    <span>${step.status} - ${step.date}</span>
+                `;
+                statusStepsEl.appendChild(stepEl);
+            });
+            let itemsHtml = "";
+            order.items.forEach(item => {
+                itemsHtml += `
+                    <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem;">
+                        <img src="${item.image}" style="width: 60px; height: 60px; object-fit: cover;">
+                        <div>
+                            <div>${item.name}</div>
+                            <div>Qty: ${item.quantity}</div>
+                            <div>$${item.price.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('order-details').innerHTML = `
+                <h4>Order Details</h4>
+                ${itemsHtml}
+                <div style="text-align: right; margin-top: 1rem;">
+                    <strong>Total: $${order.total.toFixed(2)}</strong>
+                </div>
+            `;
+            document.getElementById('order-status-result').style.display = 'block';
+            document.getElementById('order-status-result').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Add days to date
+        function addDays(dateStr, days) {
+            const date = new Date(dateStr);
+            date.setDate(date.getDate() + days);
+            return date.toISOString().split('T')[0];
+        }
+
+        // Handle search
+        function handleSearchInput(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const helpItems = elements.helpSections.querySelectorAll('.help-card li');
+            let matchFound = false;
+            helpItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (searchTerm && text.includes(searchTerm)) {
+                    item.style.display = "block";
+                    matchFound = true;
+                } else {
+                    item.style.display = searchTerm ? "none" : "block";
+                }
+            });
+            if (!matchFound && searchTerm) {
+                elements.helpSections.innerHTML += `<p style="grid-column: 1 / -1;">No help topics found. Try searching products on the <a href="project.html?search=${encodeURIComponent(searchTerm)}">home page</a>.</p>`;
+            } else {
+                const noResults = elements.helpSections.querySelector('p');
+                if (noResults) noResults.remove();
+            }
+        }
+
+        // Handle search button click
+        function handleSearch() {
+            const searchTerm = elements.searchInput.value;
+            if (!searchTerm) return;
+            const helpItems = elements.helpSections.querySelectorAll('.help-card li');
+            let matchFound = false;
+            helpItems.forEach(item => {
+                if (item.textContent.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    matchFound = true;
+                    item.click();
+                }
+            });
+            if (!matchFound) {
+                window.location.href = `project.html?search=${encodeURIComponent(searchTerm)}`;
+            }
+        }
+
+        // Form submission handling
+        document.getElementById('support-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+            if (!name || !email || !subject || !message) {
+                alert('Please fill in all fields');
+                return;
+            }
+            const ticketId = 'TICKET-' + Math.floor(Math.random() * 1000000);
+            const ticket = {
+                id: ticketId,
+                name,
+                email,
+                subject,
+                message,
+                date: new Date().toISOString(),
+                status: 'open'
+            };
+            state.supportTickets.push(ticket);
+            localStorage.setItem('supportTickets', JSON.stringify(state.supportTickets));
+            document.getElementById('ticket-number').textContent = ticketId;
+            this.reset();
+            showModal('contact-confirmation-modal');
+        });
+
+        // Initialize the app
+        document.addEventListener("DOMContentLoaded", init);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93e9803c6e347b9f',t:'MTc0NzA0ODU1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
+
+</html>
